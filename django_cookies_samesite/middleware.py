@@ -58,8 +58,17 @@ class CookiesSameSite(MiddlewareMixin):
         if samesite_flag.lower() not in {'lax', 'none', 'strict'}:
             raise ValueError('samesite must be "lax", "none", or "strict".')
 
-        for cookie in protected_cookies:
-            if cookie in response.cookies:
+        all_samesite_flag = getattr(
+            settings,
+            'ALL_SESSION_COOKIE_SAMESITE',
+            False
+        )
+        if all_samesite_flag:
+            for cookie in response.cookies:
                 response.cookies[cookie]['samesite'] = samesite_flag.lower()
+        else:
+            for cookie in protected_cookies:
+                if cookie in response.cookies:
+                    response.cookies[cookie]['samesite'] = samesite_flag.lower()
 
         return response
